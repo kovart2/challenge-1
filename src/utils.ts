@@ -1,18 +1,42 @@
-import { getJsonRpcUrl } from 'forta-agent';
+import { getJsonRpcUrl, TransactionEvent } from 'forta-agent';
 import { Contract, providers } from 'ethers';
-import { GET_FALLBACK_ORACLE_FUNCTION_ABI, PRICE_ORACLE_ADDRESS } from './constants';
+import {
+  GET_FALLBACK_ORACLE_FUNCTION_ABI,
+  PRICE_ORACLE_ADDRESS,
+  FALLBACK_ORACLE_UPDATED_EVENT_SIGNATURE
+} from './constants';
 
 export class AaveUtils {
-  private contract: Contract;
+  private readonly oracleAddress: string;
+  private fallbackOracleAddress: string | null = null;
 
-  constructor() {
-    const provider = new providers.JsonRpcProvider(getJsonRpcUrl());
-
-    // simplified contract for the agent purposes
-    this.contract = new Contract(PRICE_ORACLE_ADDRESS, GET_FALLBACK_ORACLE_FUNCTION_ABI, provider);
+  constructor(oracleAddress: string) {
+    this.oracleAddress = oracleAddress;
   }
 
-  public async getFallbackOracle(): Promise<string> {
-    return this.contract.getFallbackOracle();
+  public async getFallbackOracle(txEvent?: TransactionEvent): Promise<string> {
+    // The method optimizes contract calls to a minimum
+
+    if (txEvent) {
+      const logs = txEvent.filterLog(FALLBACK_ORACLE_UPDATED_EVENT_SIGNATURE, this.oracleAddress);
+
+      if (logs.length > 0) {
+        const lastUpdateLog = logs[logs.length - 1];
+        this.fallbackOracleAddress = lastUpdateLog.args.fallbackOracle;
+      }
+    }
+
+    if (!this.fallbackOracleAddress || !txEvent) {
+      const provider = new providers.StaticJsonRpcProvider(getJsonRpcUrl());
+      const contract = new Contract(
+        PRICE_ORACLE_ADDRESS,
+        GET_FALLBACK_ORACLE_FUNCTION_ABI,
+        provider
+      );
+
+      this.fallbackOracleAddress = await contract.getFallbackOracle();
+    }
+
+    return this.fallbackOracleAddress!;
   }
 }

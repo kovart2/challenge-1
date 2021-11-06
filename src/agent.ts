@@ -10,9 +10,9 @@ export const PROTOCOL = 'aave';
 export const GET_FALLBACK_ADDRESS_ALERT_ID = 'AAVE-FALLBACK-ORACLE-CALL-0';
 export const GET_FALLBACK_PRICE_ALERT_ID = 'AAVE-FALLBACK-ORACLE-CALL-1';
 
-const aaveUtils = new AaveUtils();
+const aaveUtils = new AaveUtils(PRICE_ORACLE_ADDRESS);
 
-async function provideHandleTransaction(aaveUtils: AaveUtils) {
+function provideHandleTransaction(aaveUtils: AaveUtils) {
   return async function handleTransaction(txEvent: TransactionEvent) {
     const findings: Finding[] = [];
 
@@ -45,11 +45,11 @@ async function provideHandleTransaction(aaveUtils: AaveUtils) {
       PRICE_ORACLE_ADDRESS
     );
 
-    // absence of getAssetPrice() calls means that we also have no fallback oracle calls
+    // fallback oracle can only be invoked inside getAssetPrice() of the aave oracle
     if (!getAssetPriceCalls.length) return findings;
 
     // get current contract address of the fallback price oracle (could be changed by contract owner)
-    const fallbackOracleAddress = await aaveUtils.getFallbackOracle();
+    const fallbackOracleAddress = await aaveUtils.getFallbackOracle(txEvent);
 
     // looking for traces of getAssetPrice() function on Fallback Price Oracle contract
     const getFallbackAssetPriceCalls = txEvent.filterFunction(
