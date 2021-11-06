@@ -16,7 +16,7 @@ function provideHandleTransaction(aaveUtils: AaveUtils) {
   return async function handleTransaction(txEvent: TransactionEvent) {
     const findings: Finding[] = [];
 
-    // looking for traces of getFallbackOracle() function on Price Oracle contract
+    // look for traces of getFallbackOracle() function on Price Oracle contract
     const getFallbackFunctionCalls = txEvent.filterFunction(
       GET_FALLBACK_ORACLE_FUNCTION_ABI,
       aaveUtils.oracleAddress
@@ -39,19 +39,19 @@ function provideHandleTransaction(aaveUtils: AaveUtils) {
       );
     }
 
-    // looking for traces of getAssetPrice() function on Price Oracle contract
+    // look for traces of getAssetPrice() function on Price Oracle contract
     const getAssetPriceCalls = txEvent.filterFunction(
       GET_ASSET_PRICE_FUNCTION_ABI,
       aaveUtils.oracleAddress
     );
 
-    // fallback oracle can only be invoked inside getAssetPrice() of the aave oracle
+    // fallback oracle can only be called inside the getAssetPrice() function of the price oracle
     if (!getAssetPriceCalls.length) return findings;
 
     // get current contract address of the fallback price oracle (could be changed by contract owner)
     const fallbackOracleAddress = await aaveUtils.getFallbackOracleAddress(txEvent);
 
-    // looking for traces of getAssetPrice() function on Fallback Price Oracle contract
+    // look for traces of getAssetPrice() function on Fallback Price Oracle contract
     const getFallbackAssetPriceCalls = txEvent.filterFunction(
       GET_ASSET_PRICE_FUNCTION_ABI,
       fallbackOracleAddress
