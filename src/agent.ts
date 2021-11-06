@@ -19,7 +19,7 @@ function provideHandleTransaction(aaveUtils: AaveUtils) {
     // looking for traces of getFallbackOracle() function on Price Oracle contract
     const getFallbackFunctionCalls = txEvent.filterFunction(
       GET_FALLBACK_ORACLE_FUNCTION_ABI,
-      PRICE_ORACLE_ADDRESS
+      aaveUtils.oracleAddress
     );
 
     // fire alert if we find getFallbackOracle() call
@@ -42,14 +42,14 @@ function provideHandleTransaction(aaveUtils: AaveUtils) {
     // looking for traces of getAssetPrice() function on Price Oracle contract
     const getAssetPriceCalls = txEvent.filterFunction(
       GET_ASSET_PRICE_FUNCTION_ABI,
-      PRICE_ORACLE_ADDRESS
+      aaveUtils.oracleAddress
     );
 
     // fallback oracle can only be invoked inside getAssetPrice() of the aave oracle
     if (!getAssetPriceCalls.length) return findings;
 
     // get current contract address of the fallback price oracle (could be changed by contract owner)
-    const fallbackOracleAddress = await aaveUtils.getFallbackOracle(txEvent);
+    const fallbackOracleAddress = await aaveUtils.getFallbackOracleAddress(txEvent);
 
     // looking for traces of getAssetPrice() function on Fallback Price Oracle contract
     const getFallbackAssetPriceCalls = txEvent.filterFunction(
@@ -63,7 +63,7 @@ function provideHandleTransaction(aaveUtils: AaveUtils) {
       findings.push(
         Finding.fromObject({
           name: 'Aave Fallback Price Oracle Usage',
-          description: `Fallback oracle was used to get the price of ${assetAddress} asset`,
+          description: `Fallback oracle was used to get the price of the asset at address ${assetAddress}`,
           alertId: GET_FALLBACK_PRICE_ALERT_ID,
           protocol: PROTOCOL,
           severity: FindingSeverity.Medium,

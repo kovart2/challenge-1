@@ -7,14 +7,14 @@ import {
 } from './constants';
 
 export class AaveUtils {
-  private readonly oracleAddress: string;
+  public oracleAddress: string;
   private fallbackOracleAddress: string | null = null;
 
   constructor(oracleAddress: string) {
     this.oracleAddress = oracleAddress;
   }
 
-  public async getFallbackOracle(txEvent?: TransactionEvent): Promise<string> {
+  public async getFallbackOracleAddress(txEvent?: TransactionEvent): Promise<string> {
     // The method optimizes contract calls to a minimum
 
     if (txEvent) {
