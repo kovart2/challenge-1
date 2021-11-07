@@ -19,13 +19,18 @@ export class TestUtils {
     return trace as any;
   }
 
-  createTxEvent(traces: Array<Trace>, from: string = '0x01'): TransactionEvent {
+  createTxEvent(
+    traces: Array<Trace>,
+    from: string = '0x01',
+    to: string = '0x02'
+  ): TransactionEvent {
     return createTransactionEvent({
       traces: traces,
       transaction: {
-        from
+        from,
+        to
       } as any,
-      addresses: { '0x01': true, '0x02': true },
+      addresses: { [from]: true, [to]: true },
       receipt: {} as any,
       block: {} as any
     });

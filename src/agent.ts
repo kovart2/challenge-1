@@ -14,7 +14,7 @@ const aaveUtils = new AaveUtils(PRICE_ORACLE_ADDRESS);
 
 function provideHandleTransaction(aaveUtils: AaveUtils) {
   return async function handleTransaction(txEvent: TransactionEvent) {
-    // this method updates local state if detects interesting events
+    // used for optimization
     aaveUtils.processTransaction(txEvent);
 
     const findings: Finding[] = [];
