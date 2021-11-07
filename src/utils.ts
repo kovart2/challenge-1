@@ -39,13 +39,13 @@ export class AaveUtils {
     this.fallbackOracleAddress = await priceOracle.getFallbackOracle();
 
     const { data } = await axios.get(MAINNET_TOKENS_CONFIG_URL);
-    const tokenConfig = data.proto as Array<any>;
+    const tokenConfigs = data.proto as Array<any>;
 
-    for (const obj of tokenConfig) {
+    for (const config of tokenConfigs) {
       this.tokens.push({
-        decimals: obj.decimals,
-        address: obj.address,
-        symbol: obj.symbol
+        decimals: config.decimals,
+        address: config.address,
+        symbol: config.symbol
       });
     }
   }
