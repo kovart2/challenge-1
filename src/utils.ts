@@ -1,9 +1,9 @@
 import { getJsonRpcUrl, TransactionEvent } from 'forta-agent';
 import { Contract, providers } from 'ethers';
 import {
-  GET_FALLBACK_ORACLE_FUNCTION_ABI,
   PRICE_ORACLE_ADDRESS,
-  FALLBACK_ORACLE_UPDATED_EVENT_SIGNATURE
+  GET_FALLBACK_ORACLE_FUNCTION_ABI,
+  FALLBACK_ORACLE_UPDATED_EVENT_ABI
 } from './constants';
 
 export class AaveUtils {
@@ -14,19 +14,19 @@ export class AaveUtils {
     this.oracleAddress = oracleAddress;
   }
 
-  public async getFallbackOracleAddress(txEvent?: TransactionEvent): Promise<string> {
+  public processTransaction(txEvent: TransactionEvent) {
     // The method optimizes contract calls to a minimum
+    // by detecting state changes in transaction logs.
 
-    if (txEvent) {
-      const logs = txEvent.filterLog(FALLBACK_ORACLE_UPDATED_EVENT_SIGNATURE, this.oracleAddress);
-
-      if (logs.length > 0) {
-        const lastUpdateLog = logs[logs.length - 1];
-        this.fallbackOracleAddress = lastUpdateLog.args.fallbackOracle;
-      }
+    const logs = txEvent.filterLog(FALLBACK_ORACLE_UPDATED_EVENT_ABI, this.oracleAddress);
+    if (logs.length > 0) {
+      const lastUpdateLog = logs[logs.length - 1];
+      this.fallbackOracleAddress = lastUpdateLog.args.fallbackOracle;
     }
+  }
 
-    if (!this.fallbackOracleAddress || !txEvent) {
+  public async getFallbackOracleAddress(): Promise<string> {
+    if (!this.fallbackOracleAddress) {
       const provider = new providers.StaticJsonRpcProvider(getJsonRpcUrl());
       const contract = new Contract(
         PRICE_ORACLE_ADDRESS,

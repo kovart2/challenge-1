@@ -5,7 +5,7 @@ export const GET_FALLBACK_ORACLE_FUNCTION_ABI = 'function getFallbackOracle()';
 export const GET_ASSET_PRICE_FUNCTION_ABI = 'function getAssetPrice(address asset)';
 
 // https://github.com/aave/protocol-v2/blob/master/contracts/misc/AaveOracle.sol#L23
-export const FALLBACK_ORACLE_UPDATED_EVENT_SIGNATURE =
+export const FALLBACK_ORACLE_UPDATED_EVENT_ABI =
   'event FallbackOracleUpdated(address indexed fallbackOracle)';
 
 // https://docs.aave.com/developers/deployed-contracts/deployed-contracts

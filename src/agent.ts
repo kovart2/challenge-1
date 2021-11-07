@@ -14,6 +14,9 @@ const aaveUtils = new AaveUtils(PRICE_ORACLE_ADDRESS);
 
 function provideHandleTransaction(aaveUtils: AaveUtils) {
   return async function handleTransaction(txEvent: TransactionEvent) {
+    // this method updates local state if detects interesting events
+    aaveUtils.processTransaction(txEvent);
+
     const findings: Finding[] = [];
 
     // look for traces of getFallbackOracle() function on Price Oracle contract
@@ -49,7 +52,7 @@ function provideHandleTransaction(aaveUtils: AaveUtils) {
     if (!getAssetPriceCalls.length) return findings;
 
     // get current contract address of the fallback price oracle (could be changed by contract owner)
-    const fallbackOracleAddress = await aaveUtils.getFallbackOracleAddress(txEvent);
+    const fallbackOracleAddress = await aaveUtils.getFallbackOracleAddress();
 
     // look for traces of getAssetPrice() function on Fallback Price Oracle contract
     const getFallbackAssetPriceCalls = txEvent.filterFunction(
