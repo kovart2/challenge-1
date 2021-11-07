@@ -13,9 +13,9 @@ const utils = new TestUtils();
 
 describe('aave fallback oracle agent', () => {
   describe('handleTransaction', () => {
-    it('returns empty findings if oracle contract is not involved', async () => {
+    it('returns empty findings if price oracle address is not involved', async () => {
       const aaveUtilsMock = {
-        processTransaction: jest.fn()
+        handleTransaction: jest.fn()
       };
 
       const handleTransaction = provideHandleTransaction(aaveUtilsMock as any);
@@ -24,7 +24,7 @@ describe('aave fallback oracle agent', () => {
 
       const findings = await handleTransaction(txEvent);
 
-      expect(aaveUtilsMock.processTransaction.mock.calls.length).toBe(1);
+      expect(aaveUtilsMock.handleTransaction.mock.calls.length).toBe(1);
       expect(findings).toStrictEqual([]);
     });
 
@@ -33,8 +33,8 @@ describe('aave fallback oracle agent', () => {
 
       const aaveUtilsMock = {
         oracleAddress: oracleAddress,
-        processTransaction: jest.fn(),
-        getFallbackOracleAddress: jest.fn().mockReturnValue(fallbackOracleAddress)
+        fallbackOracleAddress: fallbackOracleAddress,
+        handleTransaction: jest.fn()
       };
 
       const handleTransaction = provideHandleTransaction(aaveUtilsMock as any);
@@ -46,8 +46,7 @@ describe('aave fallback oracle agent', () => {
 
       const findings = await handleTransaction(txEvent);
 
-      expect(aaveUtilsMock.processTransaction.mock.calls.length).toBe(1);
-      expect(aaveUtilsMock.getFallbackOracleAddress.mock.calls.length).toBe(0);
+      expect(aaveUtilsMock.handleTransaction.mock.calls.length).toBe(1);
 
       expect(findings).toStrictEqual([]);
     });
@@ -57,8 +56,8 @@ describe('aave fallback oracle agent', () => {
 
       const aaveUtilsMock = {
         oracleAddress: oracleAddress,
-        processTransaction: jest.fn(),
-        getFallbackOracleAddress: jest.fn().mockReturnValue(fallbackOracleAddress)
+        fallbackOracleAddress: fallbackOracleAddress,
+        handleTransaction: jest.fn()
       };
 
       const handleTransaction = provideHandleTransaction(aaveUtilsMock as any);
@@ -81,20 +80,19 @@ describe('aave fallback oracle agent', () => {
         }
       });
 
-      expect(aaveUtilsMock.processTransaction.mock.calls.length).toBe(1);
-      expect(aaveUtilsMock.getFallbackOracleAddress.mock.calls.length).toBe(0);
+      expect(aaveUtilsMock.handleTransaction.mock.calls.length).toBe(1);
 
       expect(findings).toStrictEqual([finding]);
     });
 
-    it('returns a finding if fallback getAssetPrice() is called', async () => {
+    it('returns a finding if fallback oracle getAssetPrice() is called', async () => {
       const assetAddress = '0x7C1e2f858d25D56fA9e33Eb55a24485D08868192';
       const [oracleAddress, fallbackOracleAddress, fromAddress] = ['0x01', '0x02', '0x0666'];
 
       const aaveUtilsMock = {
         oracleAddress: oracleAddress,
-        processTransaction: jest.fn(),
-        getFallbackOracleAddress: jest.fn().mockReturnValue(fallbackOracleAddress)
+        fallbackOracleAddress: fallbackOracleAddress,
+        handleTransaction: jest.fn()
       };
 
       const handleTransaction = provideHandleTransaction(aaveUtilsMock as any);
@@ -123,8 +121,7 @@ describe('aave fallback oracle agent', () => {
         }
       });
 
-      expect(aaveUtilsMock.processTransaction.mock.calls.length).toBe(1);
-      expect(aaveUtilsMock.getFallbackOracleAddress.mock.calls.length).toBe(1);
+      expect(aaveUtilsMock.handleTransaction.mock.calls.length).toBe(1);
 
       expect(findings).toStrictEqual([finding]);
     });

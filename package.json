@@ -17,11 +17,11 @@
     "test": "jest"
   },
   "dependencies": {
+    "@aave/protocol-v2": "^1.0.1",
     "bignumber.js": "^9.0.1",
+    "ethers": "^5.5.1",
     "forta-agent": "^0.0.29",
-    "keccak256": "^1.0.3",
-    "lodash": "^4.17.21",
-    "ethers": "^5.5.1"
+    "lodash": "^4.17.21"
   },
   "devDependencies": {
     "@types/jest": "^27.0.1",

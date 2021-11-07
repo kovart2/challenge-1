@@ -1,21 +1,21 @@
 import { TransactionEvent, Finding, FindingSeverity, FindingType } from 'forta-agent';
 import { AaveUtils } from './utils';
-import {
-  GET_ASSET_PRICE_FUNCTION_ABI,
-  GET_FALLBACK_ORACLE_FUNCTION_ABI,
-  PRICE_ORACLE_ADDRESS
-} from './constants';
+import { GET_ASSET_PRICE_FUNCTION_ABI, GET_FALLBACK_ORACLE_FUNCTION_ABI } from './constants';
 
 export const PROTOCOL = 'aave';
 export const GET_FALLBACK_ADDRESS_ALERT_ID = 'AAVE-FALLBACK-ORACLE-CALL-0';
 export const GET_FALLBACK_PRICE_ALERT_ID = 'AAVE-FALLBACK-ORACLE-CALL-1';
 
-const aaveUtils = new AaveUtils(PRICE_ORACLE_ADDRESS);
+const aaveUtils = new AaveUtils();
+
+async function initialize() {
+  await aaveUtils.fetchConfigs();
+}
 
 function provideHandleTransaction(aaveUtils: AaveUtils) {
   return async function handleTransaction(txEvent: TransactionEvent) {
-    // used for optimizations
-    aaveUtils.processTransaction(txEvent);
+    // update contract addresses if update events are found in the logs
+    aaveUtils.handleTransaction(txEvent);
 
     const findings: Finding[] = [];
 
@@ -45,19 +45,16 @@ function provideHandleTransaction(aaveUtils: AaveUtils) {
     // look for traces of getAssetPrice() function on Price Oracle contract
     const getAssetPriceCalls = txEvent.filterFunction(
       GET_ASSET_PRICE_FUNCTION_ABI,
-      aaveUtils.oracleAddress
+      aaveUtils.oracleAddress!
     );
 
     // fallback oracle can only be called inside the getAssetPrice() function of the price oracle
     if (!getAssetPriceCalls.length) return findings;
 
-    // get current contract address of the fallback price oracle (could be changed by contract owner)
-    const fallbackOracleAddress = await aaveUtils.getFallbackOracleAddress();
-
     // look for traces of getAssetPrice() function on Fallback Price Oracle contract
     const getFallbackAssetPriceCalls = txEvent.filterFunction(
       GET_ASSET_PRICE_FUNCTION_ABI,
-      fallbackOracleAddress
+      aaveUtils.fallbackOracleAddress
     );
 
     // fire alerts for each getAssetPrice() fallback call
@@ -84,6 +81,7 @@ function provideHandleTransaction(aaveUtils: AaveUtils) {
 }
 
 export default {
+  initialize,
   provideHandleTransaction,
   handleTransaction: provideHandleTransaction(aaveUtils)
 };
