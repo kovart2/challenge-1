@@ -17,3 +17,5 @@ export const PRICE_ORACLE_UPDATED_EVENT_ABI =
 // https://github.com/aave/protocol-v2/blob/master/contracts/misc/AaveOracle.sol#L23
 export const FALLBACK_ORACLE_UPDATED_EVENT_ABI =
   'event FallbackOracleUpdated(address indexed fallbackOracle)';
+
+export const MAINNET_TOKENS_CONFIG_URL = 'https://aave.github.io/aave-addresses/mainnet.json';

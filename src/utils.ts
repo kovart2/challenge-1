@@ -1,16 +1,25 @@
-import { getJsonRpcUrl, TransactionEvent } from 'forta-agent';
+import axios from 'axios';
 import { Contract, ethers } from 'ethers';
+import { getJsonRpcUrl, TransactionEvent } from 'forta-agent';
 import ILendingPoolAddressesProvider from '@aave/protocol-v2/artifacts/contracts/interfaces/ILendingPoolAddressesProvider.sol/ILendingPoolAddressesProvider.json';
 import {
-  PRICE_ORACLE_UPDATED_EVENT_ABI,
-  FALLBACK_ORACLE_UPDATED_EVENT_ABI,
   GET_FALLBACK_ORACLE_FUNCTION_ABI,
-  LENDING_POOL_ADDRESSES_PROVIDER_ADDRESS
+  LENDING_POOL_ADDRESSES_PROVIDER_ADDRESS,
+  FALLBACK_ORACLE_UPDATED_EVENT_ABI,
+  PRICE_ORACLE_UPDATED_EVENT_ABI,
+  MAINNET_TOKENS_CONFIG_URL
 } from './constants';
 
+export type TokenConfig = {
+  symbol: string;
+  address: string;
+  decimals: number;
+};
+
 export class AaveUtils {
-  public oracleAddress: string | undefined;
-  public fallbackOracleAddress: string | undefined;
+  public oracleAddress!: string;
+  public fallbackOracleAddress!: string;
+  public tokens: TokenConfig[] = [];
 
   public async fetchConfigs() {
     const jsonRpcProvider = new ethers.providers.StaticJsonRpcProvider(getJsonRpcUrl());
@@ -25,9 +34,20 @@ export class AaveUtils {
     this.oracleAddress = await lendingPoolAddressesProvider.getPriceOracle();
 
     const priceOracleIface = new ethers.utils.Interface([GET_FALLBACK_ORACLE_FUNCTION_ABI]);
-    const priceOracle = new Contract(this.oracleAddress!, priceOracleIface, jsonRpcProvider);
+    const priceOracle = new Contract(this.oracleAddress, priceOracleIface, jsonRpcProvider);
 
     this.fallbackOracleAddress = await priceOracle.getFallbackOracle();
+
+    const { data } = await axios.get(MAINNET_TOKENS_CONFIG_URL);
+    const tokenConfig = data.proto as Array<any>;
+
+    for (const obj of tokenConfig) {
+      this.tokens.push({
+        decimals: obj.decimals,
+        address: obj.address,
+        symbol: obj.symbol
+      });
+    }
   }
 
   public handleTransaction(txEvent: TransactionEvent) {

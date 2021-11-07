@@ -30,13 +30,15 @@ function provideHandleTransaction(aaveUtils: AaveUtils) {
       findings.push(
         Finding.fromObject({
           name: 'Aave getFallbackOracle() Function Call',
-          description: `External getFallbackOracle() function is called by ${txEvent.from}`,
+          description: `Price Oracle function getFallbackOracle() was called by ${txEvent.from}`,
           alertId: GET_FALLBACK_ADDRESS_ALERT_ID,
           protocol: PROTOCOL,
           severity: FindingSeverity.Medium,
           type: FindingType.Info,
           metadata: {
-            from: txEvent.from
+            from: txEvent.from,
+            oracleAddress: aaveUtils.oracleAddress,
+            fallbackOracleAddress: aaveUtils.fallbackOracleAddress
           }
         })
       );
@@ -45,7 +47,7 @@ function provideHandleTransaction(aaveUtils: AaveUtils) {
     // look for traces of getAssetPrice() function on Price Oracle contract
     const getAssetPriceCalls = txEvent.filterFunction(
       GET_ASSET_PRICE_FUNCTION_ABI,
-      aaveUtils.oracleAddress!
+      aaveUtils.oracleAddress
     );
 
     // fallback oracle can only be called inside the getAssetPrice() function of the price oracle
@@ -59,18 +61,25 @@ function provideHandleTransaction(aaveUtils: AaveUtils) {
 
     // fire alerts for each getAssetPrice() fallback call
     for (const transaction of getFallbackAssetPriceCalls) {
-      const { asset: assetAddress } = transaction.args;
+      const { asset } = transaction.args;
+      const token = aaveUtils.tokens.find((t) => t.address === asset);
+      const description =
+        `Fallback Price Oracle was used to get the price of ` +
+        (token ? `the ${token!.symbol} asset` : `the asset at address ${asset}`);
+
       findings.push(
         Finding.fromObject({
           name: 'Aave Fallback Price Oracle Usage',
-          description: `Fallback oracle was used to get the price of the asset at address ${assetAddress}`,
+          description: description,
           alertId: GET_FALLBACK_PRICE_ALERT_ID,
           protocol: PROTOCOL,
           severity: FindingSeverity.Medium,
           type: FindingType.Suspicious,
           metadata: {
-            asset: assetAddress,
-            from: txEvent.from
+            asset: asset,
+            from: txEvent.from,
+            oracleAddress: aaveUtils.oracleAddress,
+            fallbackOracleAddress: aaveUtils.fallbackOracleAddress
           }
         })
       );
