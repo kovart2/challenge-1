@@ -1,10 +1,6 @@
 import { getJsonRpcUrl, TransactionEvent } from 'forta-agent';
 import { Contract, ethers } from 'ethers';
-import {
-  PRICE_ORACLE_ADDRESS,
-  GET_FALLBACK_ORACLE_FUNCTION_ABI,
-  FALLBACK_ORACLE_UPDATED_EVENT_ABI
-} from './constants';
+import { GET_FALLBACK_ORACLE_FUNCTION_ABI, FALLBACK_ORACLE_UPDATED_EVENT_ABI } from './constants';
 
 export class AaveUtils {
   public oracleAddress: string;
@@ -29,7 +25,7 @@ export class AaveUtils {
     if (!this.fallbackOracleAddress) {
       const iface = new ethers.utils.Interface([GET_FALLBACK_ORACLE_FUNCTION_ABI]);
       const provider = new ethers.providers.StaticJsonRpcProvider(getJsonRpcUrl());
-      const contract = new Contract(PRICE_ORACLE_ADDRESS, iface, provider);
+      const contract = new Contract(this.oracleAddress, iface, provider);
 
       this.fallbackOracleAddress = await contract.getFallbackOracle();
     }
