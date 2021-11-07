@@ -14,10 +14,10 @@ async function initialize() {
 
 function provideHandleTransaction(aaveUtils: AaveUtils) {
   return async function handleTransaction(txEvent: TransactionEvent) {
+    const findings: Finding[] = [];
+
     // update contract addresses if update events are found in the logs
     aaveUtils.handleTransaction(txEvent);
-
-    const findings: Finding[] = [];
 
     // look for traces of getFallbackOracle() function on Price Oracle contract
     const getFallbackFunctionCalls = txEvent.filterFunction(
