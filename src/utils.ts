@@ -13,19 +13,19 @@ export class AaveUtils {
   public fallbackOracleAddress: string | undefined;
 
   public async fetchConfigs() {
-    const jsonRpcUrlProvider = new ethers.providers.StaticJsonRpcProvider(getJsonRpcUrl());
+    const jsonRpcProvider = new ethers.providers.StaticJsonRpcProvider(getJsonRpcUrl());
 
     // This contract is immutable and the address will never change
     const lendingPoolAddressesProvider = new Contract(
       LENDING_POOL_ADDRESSES_PROVIDER_ADDRESS,
       ILendingPoolAddressesProvider.abi,
-      jsonRpcUrlProvider
+      jsonRpcProvider
     );
 
     this.oracleAddress = await lendingPoolAddressesProvider.getPriceOracle();
 
     const priceOracleIface = new ethers.utils.Interface([GET_FALLBACK_ORACLE_FUNCTION_ABI]);
-    const priceOracle = new Contract(this.oracleAddress!, priceOracleIface, jsonRpcUrlProvider);
+    const priceOracle = new Contract(this.oracleAddress!, priceOracleIface, jsonRpcProvider);
 
     this.fallbackOracleAddress = await priceOracle.getFallbackOracle();
   }
