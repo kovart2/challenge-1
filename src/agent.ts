@@ -16,7 +16,8 @@ function provideHandleTransaction(aaveUtils: AaveUtils) {
   return async function handleTransaction(txEvent: TransactionEvent) {
     const findings: Finding[] = [];
 
-    // update contract addresses if update events are found in the logs
+    // this methods allows us to minimize contract calls,
+    // it updates contract addresses if update events are found in the logs
     aaveUtils.handleTransaction(txEvent);
 
     // look for traces of getFallbackOracle() function on Price Oracle contract
