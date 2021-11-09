@@ -16,7 +16,7 @@ This agent scans Price Oracle transactions of the [Aave Protocol](https://aave.c
 - AAVE-FALLBACK-ORACLE-CALL-0
   - Fired when a transaction trace contains a call to `getFallbackOracle()` function
   - Severity is always set to "medium"
-  - Severity is always set to "info"
+  - Type is always set to "info"
   - Metadata
     - `from` address that initiated the transaction
     - `oracleAddress` address of the Price Oracle contract
@@ -25,7 +25,7 @@ This agent scans Price Oracle transactions of the [Aave Protocol](https://aave.c
 - AAVE-FALLBACK-ORACLE-CALL-1
   - Fired when a transaction trace contains a call to `getAssetPrice()` fallback function
   - Severity is always set to "medium"
-  - Severity is always set to "suspicious"
+  - Type is always set to "suspicious"
   - Metadata
     - `from` address that initiated the transaction
     - `asset` address of the asset to which the fallback oracle was called
